@@ -44,9 +44,16 @@ const Content = styled.div(() => ({
   },
 }));
 
+const UserInfo = styled.div(() => ({
+  padding: '10px',
+  borderTop: '1px solid #ccc',
+  backgroundColor: '#f9f9f9',
+}));
+
 const Button = styled.button(() => ({
   position: 'absolute',
-  bottom: 0,
+  top: '50%', // Centering the button vertically
+  transform: 'translateY(-50%)', // Adjusting the button position to the center
   backgroundColor: 'rgba(255, 255, 255, 0.5)',
   border: 'none',
   color: '#000',
@@ -68,8 +75,9 @@ const Post = ({ post }) => {
 
   const handleNextClick = () => {
     if (carouselRef.current) {
+      const imageWidth = carouselRef.current.children[0].offsetWidth;
       carouselRef.current.scrollBy({
-        left: 50,
+        left: imageWidth,
         behavior: 'smooth',
       });
     }
@@ -77,12 +85,24 @@ const Post = ({ post }) => {
 
   const handlePrevClick = () => {
     if (carouselRef.current) {
+      const imageWidth = carouselRef.current.children[0].offsetWidth;
       carouselRef.current.scrollBy({
-        left: -70,
+        left: -imageWidth,
         behavior: 'smooth',
       });
     }
   };
+
+  // Helper function to get initials
+  const getInitials = (firstName, lastName) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  // Check if post.user exists and has the required properties
+  const user = post.user || {};
+  const firstName = user.firstName || '';
+  const lastName = user.lastName || '';
+  const email = user.email || 'No email provided';
 
   return (
     <PostContainer>
@@ -101,6 +121,11 @@ const Post = ({ post }) => {
         <h2>{post.title}</h2>
         <p>{post.body}</p>
       </Content>
+      <UserInfo>
+        <p>
+          <strong>{getInitials(firstName, lastName)}</strong> {email}
+        </p>
+      </UserInfo>
     </PostContainer>
   );
 };
@@ -108,10 +133,16 @@ const Post = ({ post }) => {
 Post.propTypes = {
   post: PropTypes.shape({
     content: PropTypes.any,
-    images: PropTypes.shape({
-      map: PropTypes.func,
+    images: PropTypes.arrayOf(PropTypes.shape({
+      url: PropTypes.string.isRequired,
+    })).isRequired,
+    title: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+    user: PropTypes.shape({
+      firstName: PropTypes.string,
+      lastName: PropTypes.string,
+      email: PropTypes.string,
     }),
-    title: PropTypes.any,
   }),
 };
 
